@@ -1,0 +1,332 @@
+Codigo do index
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content first-content">
+            <div class="first-column">
+                <h2 class="title title-primary">bem vindo de volta!</h2>
+                <p class="description description-primary">Organize suas contas conosco</p>
+                <p class="description description-primary">Por favor faça login com seus dados</p>
+                <button class="btn btn-primary">logar</button>
+            </div>
+            <div class="second-column">
+                <h2 class="title title-second">criar conta</h2>
+                <div class="social-media">
+                    <ul class="list-social-media">
+                        <li><a href="#">email</a></li>
+                        <li><a href="#">linkedin</a></li>
+                        <li><a href="#">facebook</a></li>
+                    </ul>
+                </div>
+                <p class="description description-second">ou use seu email para registro:</p>
+                <form class="form">
+                    <input type="text" placeholder="Nome">
+                    <input type="email" placeholder="Email">
+                    <input type="password" placeholder="Senha">
+                    <button class="btn">registrar-se</button>
+                </form>
+            </div>
+        </div>
+        <div class="content second-content">
+            <div class="first-column">
+                <h2 class="title">Olá amigo!</h2>
+                <p class="description">Insira seus dados</p>
+                <p class="description">E comece a trabalhar conosco</p>
+                <button class="btn">entrar</button>
+            </div>
+            <div class="second-column">
+                <h2 class="title">Entrar na conta</h2>
+                <div class="social-media">
+                    <ul>
+                        <li><a href="#">email</a></li>
+                        <li><a href="#">linkedin</a></li>
+                        <li><a href="#">facebook</a></li>
+                    </ul>
+                </div>
+                <p class="description">ou use seu email para entrar:</p>
+                <form class="form">
+                    <input type="email" placeholder="Email">
+                    <input type="password" placeholder="Senha">
+                    <a href="#">esqueceu sua senha</a>
+                    <button class="btn">entrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
+
+codigo do style
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: gray;
+}
+.content {
+    background-color: white;
+    border-radius: 15px;
+    width: 80%;
+    height: 50%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+.content::before {
+    content: "";
+    position: absolute;
+    background-color: purple;
+    width: 45%;
+    height: 100%;
+    
+}
+.title {
+    font-size:28px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+.title-primary {
+    color:#fff;
+}
+.title-second {
+    color:aquamarine;
+}
+.description {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 30px;
+}
+.description-primary {
+    color:#fff;
+}
+.description-second {
+    color:black;
+}
+.btn {
+    border-radius: 15px;
+    text-transform: uppercase;
+    color:black;
+    font-size: 10px;
+    padding: 10px 50px;
+    cursor:  pointer;
+    font-weight: bold;
+    width: 150px;
+    align-self: center;
+    border-width: 1px;
+}
+.btn-primary {
+    background-color: transparent;
+    border: 1px solid gray;
+}
+.btn-primary:hover {
+    background-color: #fff;
+    color: purple;
+}
+.first-content {
+    display: flex;
+}
+.first-column {
+    text-align: center;
+    flex: 1 0 auto;
+    z-index: 10;
+}
+.second-column {
+    flex: 2 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.list-social-media {
+    display: flex;
+    list-style-type: none;
+}
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 55%;
+}
+.form input {
+    height: 45px;
+    border: none;
+    background-color: #fff;
+    margin: 8px;
+}
+
+
+.second-content {
+    position: absolute;
+    display: none;
+}
+
+codigo dos usuarios
+
+<?php
+session_start();
+require 'db.php';
+
+// Verificar login
+if (!isset($_SESSION['user'])) {
+    header('Location: index.html');
+    exit();
+}
+
+// CRUD
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['add'])) {
+        $nome = $_POST['nome'];
+        $email = $_POST['email'];
+        $senha = md5($_POST['senha']);
+
+        $query = $conn->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (:nome, :email, :senha)");
+        $query->bindParam(':nome', $nome);
+        $query->bindParam(':email', $email);
+        $query->bindParam(':senha', $senha);
+        $query->execute();
+    } elseif (isset($_POST['delete'])) {
+        $id = $_POST['id'];
+
+        $query = $conn->prepare("DELETE FROM usuarios WHERE id = :id");
+        $query->bindParam(':id', $id);
+        $query->execute();
+    }
+}
+
+// Listar usuários
+$usuarios = $conn->query("SELECT * FROM usuarios")->fetchAll();
+?>
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Usuários</title>
+</head>
+<body>
+    <h1>Usuários</h1>
+    <form method="POST">
+        <input type="text" name="nome" placeholder="Nome" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="senha" placeholder="Senha" required>
+        <button type="submit" name="add">Adicionar</button>
+    </form>
+    <br>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Ações</th>
+        </tr>
+        <?php foreach ($usuarios as $usuario): ?>
+            <tr>
+                <td><?php echo $usuario['id']; ?></td>
+                <td><?php echo $usuario['nome']; ?></td>
+                <td><?php echo $usuario['email']; ?></td>
+                <td>
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="id" value="<?php echo $usuario['id']; ?>">
+                        <button type="submit" name="delete">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+    <a href="dashboard.php">Voltar</a>
+</body>
+</html>
+
+codigo do dashboard
+
+<?php
+session_start();
+if (!isset($_SESSION['user'])) {
+    header('Location: index.html');
+    exit();
+}
+?>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Bem-vindo, <?php echo $_SESSION['user']['nome']; ?>!</h1>
+    <p>Você está logado com o email: <?php echo $_SESSION['user']['email']; ?></p>
+    <a href="logout.php">Sair</a>
+</body>
+</html>
+
+CODIGO DO LOGOUT
+
+<?php
+session_start();
+session_destroy();
+header('Location: index.html');
+?>
+
+CODIGO DO DB
+
+<?php
+// db.php
+$host = 'localhost';
+$db = 'meu_app';
+$user = 'root';
+$pass = '';
+
+try {
+    $conn = new PDO("mysql:host=$host;dbname=$db", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Erro ao conectar ao banco de dados: " . $e->getMessage());
+}
+
+CODIGO DO LOGIN
+
+<?php
+session_start();
+require 'db.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'];
+    $senha = md5($_POST['senha']);
+
+    echo "Email: $email <br>";
+    echo "Senha (hash): $senha <br>";
+
+    $query = $conn->prepare("SELECT * FROM usuarios WHERE email = :email AND senha = :senha");
+    $query->bindParam(':email', $email);
+    $query->bindParam(':senha', $senha);
+    $query->execute();
+
+    if ($query->rowCount() > 0) {
+        echo "Login efetuado com sucesso";
+        $_SESSION['user'] = $query->fetch();
+        header('Location: dashboard.php');
+        exit();
+    } else {
+        echo "Credenciais inválidas.";
+    }
+}
+?>
